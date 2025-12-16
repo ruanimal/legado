@@ -36,6 +36,7 @@ class DictViewModel(application: Application) : BaseViewModel(application) {
 
     override fun onCleared() {
         super.onCleared()
-        ReadAloud.resume(context)
+        val context = getApplication<Application>()
+        ReadAloud.resetParagraph(context)
     }
 }
