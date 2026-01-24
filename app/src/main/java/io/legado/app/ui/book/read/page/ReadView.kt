@@ -98,6 +98,9 @@ class ReadView(context: Context, attrs: AttributeSet) :
     private val slopSquare by lazy { ViewConfiguration.get(context).scaledTouchSlop }
     private var pageSlopSquare: Int = slopSquare
     var pageSlopSquare2: Int = pageSlopSquare * pageSlopSquare
+    private val hlRect = RectF()
+    private val hcRect = RectF()
+    private val hrRect = RectF()
     private val tlRect = RectF()
     private val tcRect = RectF()
     private val trRect = RectF()
@@ -107,6 +110,9 @@ class ReadView(context: Context, attrs: AttributeSet) :
     private val blRect = RectF()
     private val bcRect = RectF()
     private val brRect = RectF()
+    private val flRect = RectF()
+    private val fcRect = RectF()
+    private val frRect = RectF()
     private val boundary by lazy { BreakIterator.getWordInstance(Locale.getDefault()) }
     private val upProgressThrottle = throttle(200) { post { upProgress() } }
     val autoPager = AutoPager(this)
@@ -128,20 +134,38 @@ class ReadView(context: Context, attrs: AttributeSet) :
     }
 
     private fun setRect9x() {
-        tlRect.set(0f, 0f, width * 0.33f, height * 0.33f)
-        tcRect.set(width * 0.33f, 0f, width * 0.66f, height * 0.33f)
-        trRect.set(width * 0.36f, 0f, width.toFloat(), height * 0.33f)
-        mlRect.set(0f, height * 0.33f, width * 0.33f, height * 0.66f)
-        mcRect.set(width * 0.33f, height * 0.33f, width * 0.66f, height * 0.66f)
-        mrRect.set(width * 0.66f, height * 0.33f, width.toFloat(), height * 0.66f)
-        blRect.set(0f, height * 0.66f, width * 0.33f, height.toFloat())
-        bcRect.set(width * 0.33f, height * 0.66f, width * 0.66f, height.toFloat())
-        brRect.set(width * 0.66f, height * 0.66f, width.toFloat(), height.toFloat())
+        val h = curPage.headerHeight.toFloat()
+        val f = curPage.footerHeight.toFloat()
+        val w3 = width * 0.33f
+        val w6 = width * 0.66f
+        val hBody = height - h - f
+        val h3 = h + hBody * 0.33f
+        val h6 = h + hBody * 0.66f
+
+        hlRect.set(0f, 0f, w3, h)
+        hcRect.set(w3, 0f, w6, h)
+        hrRect.set(w6, 0f, width.toFloat(), h)
+
+        tlRect.set(0f, h, w3, h3)
+        tcRect.set(w3, h, w6, h3)
+        trRect.set(w6, h, width.toFloat(), h3)
+
+        mlRect.set(0f, h3, w3, h6)
+        mcRect.set(w3, h3, w6, h6)
+        mrRect.set(w6, h3, width.toFloat(), h6)
+
+        blRect.set(0f, h6, w3, height - f)
+        bcRect.set(w3, h6, w6, height - f)
+        brRect.set(w6, h6, width.toFloat(), height - f)
+
+        flRect.set(0f, height - f, w3, height.toFloat())
+        fcRect.set(w3, height - f, w6, height.toFloat())
+        frRect.set(w6, height - f, width.toFloat(), height.toFloat())
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        setRect9x()
+        post { setRect9x() }
         prevPage.x = -w.toFloat()
         pageDelegate?.setViewSize(w, h)
         if (w > 0 && h > 0) {
@@ -391,6 +415,13 @@ class ReadView(context: Context, attrs: AttributeSet) :
     private fun onSingleTapUp() {
         when {
             isTextSelected -> Unit
+            hlRect.contains(startX, startY) -> click(AppConfig.clickActionHTL)
+            hcRect.contains(startX, startY) -> click(AppConfig.clickActionHTC)
+            hrRect.contains(startX, startY) -> click(AppConfig.clickActionHTR)
+            flRect.contains(startX, startY) -> click(AppConfig.clickActionFTL)
+            fcRect.contains(startX, startY) -> click(AppConfig.clickActionFTC)
+            frRect.contains(startX, startY) -> click(AppConfig.clickActionFTR)
+
             mcRect.contains(startX, startY) -> if (!isAbortAnim) {
                 click(AppConfig.clickActionMC)
             }

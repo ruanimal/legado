@@ -64,6 +64,13 @@ class PageView(context: Context) : FrameLayout(context) {
             return h1 + h2 + binding.vwRoot.paddingTop
         }
 
+    val footerHeight: Int
+        get() {
+            val h1 = if (binding.vwNavigationBar.isGone) 0 else binding.vwNavigationBar.height
+            val h2 = if (binding.llFooter.isGone) 0 else binding.llFooter.height
+            return h1 + h2 + binding.vwRoot.paddingBottom
+        }
+
     init {
         if (!isInEditMode) {
             upStyle()
