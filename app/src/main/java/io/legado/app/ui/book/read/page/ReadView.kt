@@ -493,6 +493,8 @@ class ReadView(context: Context, attrs: AttributeSet) :
                     ReadAloud.resume(context)
                 }
             }
+
+            14 -> callBack.toggleTouchDict()
         }
     }
 
@@ -785,5 +787,6 @@ class ReadView(context: Context, attrs: AttributeSet) :
         fun openSearchActivity(searchWord: String?)
         fun upSystemUiVisibility()
         fun sureNewProgress(progress: BookProgress)
+        fun toggleTouchDict()
     }
 }

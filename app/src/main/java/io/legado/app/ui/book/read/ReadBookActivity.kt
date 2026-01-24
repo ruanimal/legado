@@ -1599,6 +1599,14 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
+    override fun toggleTouchDict() {
+        ReadBook.book?.let { book ->
+            book.setTouchDict(!book.getTouchDict())
+            val state = if (book.getTouchDict()) R.string.enabled else R.string.disabled
+            toastOnUi(getString(R.string.book_touch_dict) + ": " + getString(state))
+        }
+    }
+
     override fun finish() {
         val book = ReadBook.book ?: return super.finish()
 
