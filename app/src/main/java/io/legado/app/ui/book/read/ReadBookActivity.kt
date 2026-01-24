@@ -1607,6 +1607,20 @@ class ReadBookActivity : BaseReadBookActivity(),
         }
     }
 
+    override fun onContentAreaTap(x: Float, y: Float) {
+        // 在点击查字典模式下，点击正文区域触发查词典
+        // 选择整个单词并直接查词典
+        binding.readView.selectWordAt(x, y) {
+            // 如果正在朗读，先暂停
+            if (BaseReadAloudService.isRun) {
+                ReadAloud.pause(this)
+            }
+            // 直接触发词典查询
+            onMenuItemSelected(R.id.menu_dict)
+            binding.readView.cancelSelect()
+        }
+    }
+
     override fun finish() {
         val book = ReadBook.book ?: return super.finish()
 

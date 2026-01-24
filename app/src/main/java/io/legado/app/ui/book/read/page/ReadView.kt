@@ -339,10 +339,21 @@ class ReadView(context: Context, attrs: AttributeSet) :
      * 长按选择
      */
     private fun onLongPress() {
+        selectWordAt(startX, startY) {
+            pressOnTextSelected = true
+        }
+    }
+
+    /**
+     * 选择指定位置的整个单词，用于点击查词典和长按选择功能
+     * @param x 触摸点X坐标
+     * @param y 触摸点Y坐标
+     * @param onWordSelected 单词选中后的回调
+     */
+    fun selectWordAt(x: Float, y: Float, onWordSelected: () -> Unit) {
         kotlin.runCatching {
-            curPage.longPress(startX, startY) { textPos: TextPos ->
+            curPage.longPress(x, y) { textPos: TextPos ->
                 isTextSelected = true
-                pressOnTextSelected = true
                 initialTextPos.upData(textPos)
                 val startPos = textPos.copy()
                 val endPos = textPos.copy()
@@ -405,23 +416,40 @@ class ReadView(context: Context, attrs: AttributeSet) :
                 }
                 curPage.selectStartMoveIndex(startPos)
                 curPage.selectEndMoveIndex(endPos)
+                onWordSelected()
             }
         }
+    }
+
+    /**
+     * 检查是否在正文区域内（T/M/B区域，不包括页眉和页脚）
+     */
+    private fun isInContentArea(x: Float, y: Float): Boolean {
+        return tlRect.contains(x, y) || tcRect.contains(x, y) || trRect.contains(x, y) ||
+               mlRect.contains(x, y) || mcRect.contains(x, y) || mrRect.contains(x, y) ||
+               blRect.contains(x, y) || bcRect.contains(x, y) || brRect.contains(x, y)
     }
 
     /**
      * 单击
      */
     private fun onSingleTapUp() {
+        val touchDictEnabled = ReadBook.book?.getTouchDict() == true
         when {
             isTextSelected -> Unit
+            // 页眉区域 - 始终正常响应
             hlRect.contains(startX, startY) -> click(AppConfig.clickActionHTL)
             hcRect.contains(startX, startY) -> click(AppConfig.clickActionHTC)
             hrRect.contains(startX, startY) -> click(AppConfig.clickActionHTR)
+            // 页脚区域 - 始终正常响应
             flRect.contains(startX, startY) -> click(AppConfig.clickActionFTL)
             fcRect.contains(startX, startY) -> click(AppConfig.clickActionFTC)
             frRect.contains(startX, startY) -> click(AppConfig.clickActionFTR)
-
+            // 正文区域 - 如果开启点击查字典模式，则触发查词典
+            touchDictEnabled && isInContentArea(startX, startY) -> {
+                callBack.onContentAreaTap(startX, startY)
+            }
+            // 正文区域 - 正常点击动作
             mcRect.contains(startX, startY) -> if (!isAbortAnim) {
                 click(AppConfig.clickActionMC)
             }
@@ -788,5 +816,6 @@ class ReadView(context: Context, attrs: AttributeSet) :
         fun upSystemUiVisibility()
         fun sureNewProgress(progress: BookProgress)
         fun toggleTouchDict()
+        fun onContentAreaTap(x: Float, y: Float)
     }
 }
