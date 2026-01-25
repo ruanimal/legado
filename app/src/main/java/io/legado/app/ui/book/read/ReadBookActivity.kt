@@ -1604,6 +1604,8 @@ class ReadBookActivity : BaseReadBookActivity(),
             book.setTouchDict(!book.getTouchDict())
             val state = if (book.getTouchDict()) R.string.enabled else R.string.disabled
             toastOnUi(getString(R.string.book_touch_dict) + ": " + getString(state))
+            // Refresh the page to update touch dict status in header/footer
+            binding.readView.upContent(resetPageOffset = false)
         }
     }
 
